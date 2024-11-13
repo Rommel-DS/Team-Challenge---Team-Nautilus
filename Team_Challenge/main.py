@@ -1,4 +1,4 @@
-from Funciones import *
+from funciones import *
 import random
 import numpy as np
 
