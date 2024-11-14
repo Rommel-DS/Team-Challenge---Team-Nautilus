@@ -1,7 +1,3 @@
-import numpy as np
-import random
-import string
-
 class Tablero:
     def __init__(self, dimensiones=(10, 10), id_user=1, id_machine=0):
         self.dimensiones = dimensiones
@@ -74,14 +70,17 @@ class Tablero:
         }
         return fila + direcciones[orientacion][0], columna + direcciones[orientacion][1]
 
-    def disparar(self, fila, columna, tablero_oponente, disparos_realizados, barcos_oponente):
+    def verificar_disparo_realizado(self, fila, columna, disparos_realizados):
+        # Verifica si ya se ha realizado un disparo en las coordenadas dadas.
+        return (fila, columna) in disparos_realizados
+
+    def realizar_disparo(self, fila, columna, tablero_oponente, disparos_realizados, barcos_oponente):
         # Realiza un disparo en las coordenadas dadas y devuelve el resultado.
-        if (fila, columna) in disparos_realizados:
+        if self.verificar_disparo_realizado(fila, columna, disparos_realizados):
             return "Ya habías intentado aquí"
         disparos_realizados.add((fila, columna))
         if tablero_oponente[fila, columna] == "O":
             tablero_oponente[fila, columna] = "X"
-            # Verificar si algún barco ha sido hundido
             barco_hundido = self.comprobar_barcos_hundidos(barcos_oponente)
             if barco_hundido:
                 return f"Impacto - ¡Barco hundido! ({barco_hundido})"
@@ -112,7 +111,7 @@ class Tablero:
             disparo = input("Ingresa las coordenadas del disparo (Ejemplos: A1, B3) o X para salir: ").upper()
             if disparo == "X":
                 print("El juego ha finalizado.")
-                exit()
+                return None  # Retorna None cuando el usuario decide salir
             if len(disparo) >= 2 and disparo[0] in string.ascii_uppercase[:self.dimensiones[1]] and disparo[1:].isdigit():
                 columna = string.ascii_uppercase.index(disparo[0])
                 fila = int(disparo[1:]) - 1
@@ -137,14 +136,19 @@ class Tablero:
 
         while not self.comprobar_fin_de_juego():
             print("\nTu turno")
-            fila, columna = self.obtener_coordenadas_usuario()
-            resultado = self.disparar(fila, columna, self.tablero_machine, self.disparos_realizados_user, self.barcos_machine)
+            coordenadas = self.obtener_coordenadas_usuario()
+            if coordenadas is None:  # Verifica si el usuario ha elegido salir
+                print("Gracias por jugar.")
+                break  # Termina el bucle si el usuario decide salir
+
+            fila, columna = coordenadas
+            resultado = self.realizar_disparo(fila, columna, self.tablero_machine, self.disparos_realizados_user, self.barcos_machine)
             print(f"Resultado: {resultado}")
 
             print("\nTurno de la máquina")
             fila, columna = random.randint(0, self.dimensiones[0] - 1), random.randint(0, self.dimensiones[1] - 1)
             print(f"La máquina disparó en {string.ascii_uppercase[columna]}{fila+1}")
-            resultado = self.disparar(fila, columna, self.tablero_user, self.disparos_realizados_machine, self.barcos_user)
+            resultado = self.realizar_disparo(fila, columna, self.tablero_user, self.disparos_realizados_machine, self.barcos_user)
             print(f"Resultado de la máquina: {resultado}")
 
             print("\nTablero del usuario:")
