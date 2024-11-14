@@ -12,6 +12,8 @@ class Tablero:
         self.tablero_machine = np.full(dimensiones, "~")
         self.disparos_realizados_user = set()
         self.disparos_realizados_machine = set()
+        self.barcos_machine = {}
+        self.barcos_user = {}
 
     def colocar_barcos_en_tablero(self, barcos_dict, tablero):
 #Coloca los barcos en el tablero.
@@ -82,21 +84,18 @@ class Tablero:
             tablero_oponente[fila, columna] = "X"
             return "Impacto"
         tablero_oponente[fila, columna] = "*"
-        return "Fallaste"
-    
-    #Comprobar Tocado o hundido
-    def tocado_hundido(impacto):#impacto debería provenir de un imput que usaremos para la función disparar y para la función tocado_hundido
-        impacto= tuple(impacto)# Por si introducen las coordenadas del impacto en tipo lista
-        for barco, coordenadas in barcos_enemigos_dict.items():
-                longitud_barco= len(coordenadas)
+        print ("Fallaste")
+        disparos_realizados= tuple(disparos_realizados)# Por si introducen las coordenadas del impacto en tipo lista
+        for barco, coordenadas in self.barcos_machine.items():
+                longitud_barco = len(coordenadas)
                 comprueba_impactos= 0
-                if impacto in coordenadas:
-                        for coordenada in coordenadas:
-                                if tablero_machine[coordenada]=="X":
+                if disparos_realizados in coordenadas:
+                        for coordenadas in coordenadas:
+                                if tablero_oponente[coordenadas]=="X":
                                         comprueba_impactos += 1
-                        if comprueba_impactos== longitud_barco:
+                        if comprueba_impactos == longitud_barco:
                                 print("Barco Hundido")
-                        elif comprueba_impactos< longitud_barco:
+                        elif comprueba_impactos < longitud_barco:
                                 print("Barco Tocado")
 
     def imprimir_tablero(self, tablero, ocultar_barcos=False):
@@ -112,13 +111,19 @@ class Tablero:
     def obtener_coordenadas_usuario(self):
 #Obtiene las coordenadas del disparo del usuario.
         while True:
-            disparo = input("Ingresa las coordenadas del disparo (Ejemplo: A1, B3): ").upper()
+            disparo = input("Ingresa las coordenadas del disparo (Ejemplos: A1, B3): "
+                            "\n Si deseas salir del programa escribe X:").upper()
+            if disparo == "X":
+                print("El juego ha finalizado")
+                exit() 
             if len(disparo) >= 2 and disparo[0] in string.ascii_uppercase[:self.dimensiones[1]] and disparo[1:].isdigit():
                 columna = string.ascii_uppercase.index(disparo[0])
                 fila = int(disparo[1:]) - 1
                 if 0 <= fila < self.dimensiones[0] and 0 <= columna < self.dimensiones[1]:
                     return fila, columna
             print("Coordenada inválida. Intenta de nuevo.")
+
+            
     def iniciar_juego(self):
 #Inicia el juego entre el usuario y la máquina.
         print("\n¡Bienvenido a Hundir la Flota!")
