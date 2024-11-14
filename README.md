@@ -15,3 +15,6 @@ Este es un juego de "Hundir la Flota" (también conocido como "Battleship") impl
 
    ```bash
    pip install numpy
+
+## Descripcion
+
